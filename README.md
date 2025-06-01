@@ -3,7 +3,7 @@
 ### Deployed Link
 
 - Live link: https://notetakerassignment.netlify.app/
-- Repo Link: https://github.com/prajesh9921/Github-Dashboard-Assignment
+- Repo Link: https://github.com/prajesh9921/NoteTaker/tree/master
 
 ## Getting Started
 
