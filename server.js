@@ -1,8 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
 const dotenv = require('dotenv')
 
 const app = express();
@@ -30,82 +28,7 @@ const NoteSchema = new mongoose.Schema({
 
 const Item = mongoose.model('Item', NoteSchema);
 
-// Admin Routes
-
-
-app.get('/api/menu-items', async (req, res) => {
-  try {
-    const menuItems = await MenuItem.find();
-    res.json(menuItems);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Order Routes
-app.post('/api/orders', async (req, res) => {
-  try {
-    const { items } = req.body;
-    
-    // Calculate total price
-    const orderItems = await Promise.all(items.map(async (item) => {
-      const menuItem = await MenuItem.findById(item.menuItemId);
-      return {
-        menuItem: menuItem._id,
-        quantity: item.quantity
-      };
-    }));
-
-    const totalPrice = await calculateTotalPrice(orderItems);
-
-    const newOrder = new Order({
-      items: orderItems,
-      totalPrice
-    });
-
-    await newOrder.save();
-    res.status(201).json(newOrder);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
-app.get('/api/orders', async (req, res) => {
-  try {
-    const orders = await Order.find().populate('items.menuItem');
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-// Utility function to calculate total price
-async function calculateTotalPrice(orderItems) {
-  let total = 0;
-  for (let item of orderItems) {
-    const menuItem = await MenuItem.findById(item.menuItem);
-    total += menuItem.price * item.quantity;
-  }
-  return total;
-}
-
-// Update Order Status
-app.patch('/api/orders/:id', async (req, res) => {
-  try {
-    const { status } = req.body;
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id, 
-      { status }, 
-      { new: true }
-    );
-    res.json(updatedOrder);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
 // Note CRUD Routes
-
 // Get all notes for a specific email
 app.get('/api/notes', async (req, res) => {
   try {
