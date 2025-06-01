@@ -16,13 +16,14 @@ const NotesApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
-
+  
   useEffect(() => {
-    if (user?.sub) {
-      const userNotes = getAllNotes(user.sub);
-      setNotes(userNotes);
+    if (user?.email) {
+      getAllNotes(user.email)
+        .then(setNotes)
+        .catch((err) => setNotes([]));
     }
-  }, [user?.sub]);
+  }, [user?.email]);
 
   const filteredNotes = notes.filter(
     note =>
@@ -30,24 +31,30 @@ const NotesApp = () => {
       note.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSaveNote = (noteData) => {
-    if (!user?.sub) return;
+  const handleSaveNote = async (noteData) => {
+    if (!user?.email) return;
 
     if (editingNote) {
-      const updated = updateNote(user.sub, editingNote.id, noteData);
-      setNotes(notes.map(note => (note.id === editingNote.id ? updated : note)));
+      try {
+        const updated = await updateNote(user.email, editingNote._id, noteData);
+        setNotes(notes.map(note => (note._id === editingNote._id ? updated : note)));
+      } catch (err) {}
     } else {
-      const created = createNote(user.sub, noteData);
-      setNotes([created, ...notes]);
+      try {
+        const created = await createNote(user.email, noteData);
+        setNotes([created, ...notes]);
+      } catch (err) {}
     }
     handleCloseDialog();
   };
 
-  const handleDeleteNote = (noteId) => {
-    if (!user?.sub) return;
+  const handleDeleteNote = async (noteId) => {
+    if (!user?.email) return;
 
-    deleteNote(user.sub, noteId);
-    setNotes(notes.filter(note => note.id !== noteId));
+    try {
+      await deleteNote(user.email, noteId);
+      setNotes(notes.filter(note => note._id !== noteId));
+    } catch (err) {}
   };
 
   const handleEditNote = (note) => {

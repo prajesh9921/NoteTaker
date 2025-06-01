@@ -1,59 +1,37 @@
-const getStorageKey = function(userId) {
-  return `notes_${userId}`;
-};
+const API_URL = import.meta.env.VITE_API_URL
 
-export function getAllNotes(userId) {
-  const notesJson = localStorage.getItem(getStorageKey(userId));
-  if (!notesJson) return [];
-  return JSON.parse(notesJson);
+export async function getAllNotes(email) {
+  const res = await fetch(`${API_URL}?email=${encodeURIComponent(email)}`);
+  if (!res.ok) throw new Error('Failed to fetch notes');
+  return await res.json();
 }
 
-export function createNote(
-  userId,
-  noteData
-) {
-  const newNote = {
-    ...noteData,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  const notes = getAllNotes(userId);
-  notes.unshift(newNote);
-  localStorage.setItem(getStorageKey(userId), JSON.stringify(notes));
-  return newNote;
-}
-
-export function updateNote(
-  userId,
-  id,
-  noteData
-) {
-  const notes = getAllNotes(userId);
-  const noteIndex = notes.findIndex(function(note) {
-    return note.id === id;
+export async function createNote(email, noteData) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...noteData, email })
   });
-
-  if (noteIndex === -1) {
-    throw new Error('Note not found');
-  }
-
-  const updatedNote = {
-    ...notes[noteIndex],
-    ...noteData,
-    updatedAt: new Date().toISOString(),
-  };
-
-  notes[noteIndex] = updatedNote;
-  localStorage.setItem(getStorageKey(userId), JSON.stringify(notes));
-  return updatedNote;
+  if (!res.ok) throw new Error('Failed to create note');
+  return await res.json();
 }
 
-export function deleteNote(userId, id) {
-  const notes = getAllNotes(userId);
-  const filteredNotes = notes.filter(function(note) {
-    return note.id !== id;
+export async function updateNote(email, id, noteData) {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...noteData, email })
   });
-  localStorage.setItem(getStorageKey(userId), JSON.stringify(filteredNotes));
+  if (!res.ok) throw new Error('Failed to update note');
+  return await res.json();
+}
+
+export async function deleteNote(email, id) {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+  if (!res.ok) throw new Error('Failed to delete note');
+  return await res.json();
 } 

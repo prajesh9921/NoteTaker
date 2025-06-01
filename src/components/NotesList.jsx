@@ -32,7 +32,7 @@ const NotesList = ({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {notes.map((note) => (
         <div
-          key={note.id}
+          key={note._id || note.id}
           className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer group"
           onClick={() => onEditNote(note)}
         >
@@ -43,7 +43,7 @@ const NotesList = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDeleteNote(note.id);
+                onDeleteNote(note._id || note.id);
               }}
               className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all duration-200"
             >
@@ -53,7 +53,7 @@ const NotesList = ({
           <p className="text-gray-600 text-sm mb-3 overflow-hidden text-ellipsis whitespace-nowrap">
             {note.content}
           </p>
-          <p className="text-xs text-gray-400">{formatDate(note.updatedAt)}</p>
+          <p className="text-xs text-gray-400">{formatDate(note.updatedAt || note.createdAt)}</p>
         </div>
       ))}
     </div>

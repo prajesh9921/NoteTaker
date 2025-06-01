@@ -4,6 +4,7 @@ import { X, Save } from 'lucide-react';
 const NoteDialog = ({ note, onSave, onClose }) => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (note) {
@@ -15,12 +16,17 @@ const NoteDialog = ({ note, onSave, onClose }) => {
     }
   }, [note]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (title.trim() || content.trim()) {
-      onSave({
-        title: title.trim(),
-        content: content.trim(),
-      });
+      setLoading(true);
+      try {
+        await onSave({
+          title: title.trim(),
+          content: content.trim(),
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -38,8 +44,9 @@ const NoteDialog = ({ note, onSave, onClose }) => {
             {note ? 'Edit Note' : 'Create New Note'}
           </h2>
           <button
-            onClick={onClose}
+            onClick={loading ? undefined : onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            disabled={loading}
           >
             <X size={20} />
           </button>
@@ -59,6 +66,7 @@ const NoteDialog = ({ note, onSave, onClose }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               autoFocus
               placeholder="Enter note title..."
+              disabled={loading}
             />
           </div>
           <div>
@@ -73,23 +81,29 @@ const NoteDialog = ({ note, onSave, onClose }) => {
               rows={12}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
               placeholder="Start writing your note..."
+              disabled={loading}
             />
           </div>
         </div>
         
         <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
           <button
-            onClick={onClose}
+            onClick={loading ? undefined : onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            disabled={loading}
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            disabled={!title.trim() && !content.trim()}
+            disabled={loading || (!title.trim() && !content.trim())}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-md transition-colors"
           >
-            <Save size={16} />
+            {loading ? (
+              <svg className="animate-spin h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+            ) : (
+              <Save size={16} />
+            )}
             {note ? 'Update' : 'Save'} Note
           </button>
         </div>
