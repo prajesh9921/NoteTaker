@@ -2,7 +2,7 @@
 
 ### Deployed Link
 
-- Repo Link: https://github.com/prajesh9921/Github-Dashboard-Assignment
+- Repo Link: https://github.com/prajesh9921/NoteTaker/tree/backend
 
 ## Getting Started
 
